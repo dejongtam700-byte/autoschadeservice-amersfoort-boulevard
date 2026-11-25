@@ -486,7 +486,7 @@ footer .bot{border-top:1px solid var(--ln);padding-top:20px;padding-bottom:22px;
 /* ===== Centrale configuratie. Alleen bevestigde gegevens; lege velden worden verborgen. ===== */
 const CONFIG={
  naam:'Boulevard Auto Garage',straat:'Fluorweg 49j',postcode:'3812 RW',plaats:'Amersfoort',
- telefoon:'',whatsapp:'',email:'',kvk:'',          // bijv. telefoon:'033 123 45 67', whatsapp:'31612345678'
+ telefoon:'',whatsapp:'',email:'boulevardautogarage@gmail.com',kvk:'',          // bijv. telefoon:'033 123 45 67', whatsapp:'31612345678'
  openingstijden:[],                                 // bijv. [['Ma – vr','08:00 – 17:30']]
  formEndpoint:'',                                   // bijv. '/api/afspraak'
  tracking:false                                     // pas aanzetten met cookiemelding/privacyverklaring
@@ -614,7 +614,7 @@ if(C.email)inf+=`<a class="inf" href="mailto:${esc(C.email)}"><svg><use href="#m
 if(C.openingstijden.length)inf+=`<div class="inf"><svg><use href="#clk"/></svg><div><b>Openingstijden</b><table>${C.openingstijden.map(([d,t])=>`<tr><td>${esc(d)}</td><td>${esc(t)}</td></tr>`).join('')}</table></div></div>`;
 inf+=`<div class="inf"><svg><use href="#apk"/></svg><div><b>APK zonder afspraak</b><span>Voor de APK kunt u ook gewoon langskomen.</span></div></div>`;
 $('#info').innerHTML=inf;
-$('#fct').innerHTML=`<li>${esc(C.straat)}</li><li>${esc(C.postcode)} ${esc(C.plaats)}</li>${tel?`<li><a href="tel:${tel}">${esc(C.telefoon)}</a></li>`:''}${waBase?`<li><a href="${waUrl('Hallo Boulevard Auto Garage, ')}" target="_blank" rel="noopener">WhatsApp</a></li>`:''}<li><a href="${maps}" target="_blank" rel="noopener" data-track="route">Route plannen</a></li>`;
+$('#fct').innerHTML=`<li>${esc(C.straat)}</li><li>${esc(C.postcode)} ${esc(C.plaats)}</li>${tel?`<li><a href="tel:${tel}">${esc(C.telefoon)}</a></li>`:''}${waBase?`<li><a href="${waUrl('Hallo Boulevard Auto Garage, ')}" target="_blank" rel="noopener">WhatsApp</a></li>`:''}${C.email?`<li><a href="mailto:${esc(C.email)}">${esc(C.email)}</a></li>`:''}<li><a href="${maps}" target="_blank" rel="noopener" data-track="route">Route plannen</a></li>`;
 $('#copy').textContent=`© ${new Date().getFullYear()} ${C.naam}${C.kvk?' · KvK '+C.kvk:''}`;
 $('#mbar').innerHTML=`${tel?`<a href="tel:${tel}" data-track="bellen"><svg><use href="#ph"/></svg>Bellen</a>`:''}${waBase?`<a href="${waUrl('Hallo Boulevard Auto Garage, ')}" target="_blank" rel="noopener" data-track="whatsapp"><svg><use href="#wa"/></svg>WhatsApp</a>`:''}${!tel||!waBase?`<a href="${maps}" target="_blank" rel="noopener" data-track="route"><svg><use href="#pin"/></svg>Route</a>`:''}<a class="p" href="#contact" data-dienst="">Afspraak</a>`;
 
@@ -632,7 +632,7 @@ function valid(){let ok=true;const t=v('tel').replace(/[\s()-]/g,''),k=v('kentek
  if(!ok)$('[aria-invalid=true]').focus();return !!ok}
 const sum=()=>[`Afspraakverzoek ${C.naam}`,`Naam: ${v('naam')}`,`Telefoon: ${v('tel')}`,`Kenteken: ${v('kenteken').toUpperCase()||'—'}`,`Dienst: ${DN(v('dienst'))}`,`Gewenste datum: ${v('datum')?new Date(v('datum')).toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'}):'—'}`,`Omschrijving: ${v('oms')||'—'}`].join('\n');
 $('#form').addEventListener('submit',async e=>{e.preventDefault();if(!valid())return;const r=$('#result');r.hidden=false;track('afspraak_aanvraag',{dienst:v('dienst')});
- if(!C.formEndpoint){r.innerHTML=`<h4>Uw aanvraag is nog niet verzonden</h4><p>Het online formulier is nog niet aangesloten op de garage.${waBase?' U kunt uw aanvraag via WhatsApp sturen.':' Kom langs of neem op een andere manier contact met ons op.'}</p><pre>${esc(sum())}</pre>${waBase?`<a class="btn wa" href="${waUrl(sum())}" target="_blank" rel="noopener" data-track="whatsapp"><svg><use href="#wa"/></svg>Versturen via WhatsApp</a>`:''}`;r.focus();return}
+ if(!C.formEndpoint){r.innerHTML=`<h4>Uw aanvraag is nog niet verzonden</h4><p>Het online formulier is nog niet aangesloten op de garage.${waBase||C.email?' U kunt uw aanvraag hieronder per '+(waBase&&C.email?'WhatsApp of e-mail':waBase?'WhatsApp':'e-mail')+' versturen.':' Kom langs of neem op een andere manier contact met ons op.'}</p><pre>${esc(sum())}</pre>${C.email?`<a class="btn p" href="mailto:${esc(C.email)}?subject=${encodeURIComponent('Afspraakverzoek – '+DN(v('dienst')))}&body=${encodeURIComponent(sum())}" data-track="email"><svg><use href="#ml"/></svg>Versturen per e-mail</a> `:''}${waBase?`<a class="btn wa" href="${waUrl(sum())}" target="_blank" rel="noopener" data-track="whatsapp"><svg><use href="#wa"/></svg>Versturen via WhatsApp</a>`:''}`;r.focus();return}
  const b=$('#sendB');b.disabled=true;
  try{const res=await fetch(C.formEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({naam:v('naam'),telefoon:v('tel'),kenteken:v('kenteken'),dienst:v('dienst'),datum:v('datum'),omschrijving:v('oms')})});if(!res.ok)throw 0;
   r.innerHTML='<h4>Bedankt, uw aanvraag is ontvangen</h4><p>Dit is nog geen bevestigde afspraak. Wij nemen contact met u op om een moment af te spreken.</p>';$('#form').reset()}
